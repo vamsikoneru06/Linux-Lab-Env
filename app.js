@@ -159,6 +159,7 @@
 
   function progressBar(tasks) {
     const grid = el('div', { class: 'progress', 'aria-hidden': 'true' });
+    grid.style.gridTemplateColumns = 'repeat(' + LAB_TASKS.length + ', 1fr)';
     let passedTasks = 0;
     for (const t of LAB_TASKS) {
       const state = cardState(t);

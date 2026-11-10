@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RHLab - Command reference</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .ref-wrap { max-width: 980px; margin: 0 auto; padding: 24px; overflow-y: auto; height: calc(100vh - 60px); }
+    .ref-top { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
+    .ref-top h2 { margin: 0; font-size: 18px; }
+    .ref-top input {
+      flex: 1; min-width: 220px; padding: 8px 12px; border: 1px solid var(--ink);
+      font: 500 13px var(--mono); background: var(--paper); color: var(--ink);
+    }
+    .ref-cat { margin: 24px 0 8px; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+    .cmd { background: var(--paper); border: 1px solid var(--line); padding: 14px 16px; margin-bottom: 12px; }
+    .cmd h3 { margin: 0 0 4px; font: 700 15px var(--mono); }
+    .cmd .syntax { font: 500 12px var(--mono); color: var(--ink-2); background: var(--code-bg); padding: 6px 8px; margin: 6px 0; overflow-x: auto; white-space: pre; }
+    .cmd .summary { color: var(--ink-2); }
+    .cmd table { border-collapse: collapse; margin: 8px 0; font-size: 12px; }
+    .cmd td { padding: 3px 14px 3px 0; vertical-align: top; }
+    .cmd td:first-child { font: 600 12px var(--mono); white-space: nowrap; }
+    .ex { margin-top: 10px; border: 1px solid var(--ink); }
+    .ex .cmdline { background: var(--ink); color: #fff; font: 500 12px var(--mono); padding: 6px 10px; overflow-x: auto; white-space: pre; }
+    .ex .cmdline .h { color: #7ee787; }
+    .ex .outline { background: var(--code-bg); font: 13px/1.5 var(--mono); padding: 8px 10px; white-space: pre-wrap; color: var(--ink-2); }
+    .ex .outline.err { color: var(--fail); }
+    .ex .exit { font: 500 11px var(--mono); color: var(--muted); padding: 2px 10px 6px; background: var(--code-bg); }
+    .ex .exit.bad { color: var(--fail); }
+    .ref-nav a { color: var(--server); font-weight: 600; }
+    .hidden { display: none !important; }
+    .note { color: var(--muted); font-size: 12px; margin: 4px 0 12px; }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><rect width="28" height="28" fill="#0b0d10"/><path d="M7 8.5l5.5 5.5L7 19.5" fill="none" stroke="#fff" stroke-width="2.4"/><rect x="14.5" y="18" width="7" height="2.6" fill="#5c85ff"/></svg>
+      <div class="wordmark"><span class="b">RH</span><span>Lab</span></div>
+      <span class="divider"></span>
+      <span class="sub">command reference</span>
+    </div>
+    <div class="toolbar">
+      <a class="btn" href="index.html" style="text-decoration:none;color:var(--ink)">Back to lab</a>
+    </div>
+  </header>
+
+  <main style="display:block;height:auto">
+    <div class="ref-wrap">
+      <div class="ref-top">
+        <h2>Every command the lab supports</h2>
+        <input id="q" type="search" placeholder="Filter commands, e.g. lvextend, mount, sudo" aria-label="Filter commands">
+      </div>
+      <p class="note" id="count"></p>
+      <div id="list"></div>
+      <p class="note">Outputs were produced by running each command in the simulator (not typed by hand), so they match what the lab prints. Real RHEL may print slightly different text.</p>
+    </div>
+  </main>
+
+  <script src="reference-data.js"></script>
+  <script>
+  (function () {
+    'use strict';
+    const list = document.getElementById('list');
+    const q = document.getElementById('q');
+    const count = document.getElementById('count');
+
+    function el(tag, props, children) {
+      const n = document.createElement(tag);
+      if (props) for (const [k, v] of Object.entries(props)) {
+        if (k === 'class') n.className = v; else if (k === 'text') n.textContent = v; else n.setAttribute(k, v);
+      }
+      for (const c of children || []) n.append(c);
+      return n;
+    }
+
+    function exampleBlock(ex) {
+      const prompt = el('span', { class: 'h', text: '[root@' + (ex.host === 'client' ? 'client' : 'server') + ' ~]# ' });
+      const cmdline = el('div', { class: 'cmdline' }, [prompt, document.createTextNode(ex.cmd)]);
+      const out = (ex.out || '') + (ex.err || '');
+      const outline = el('div', { class: 'outline' + (ex.err ? ' err' : ''), text: out.length ? out.replace(/\n$/, '') : '(no output)' });
+      const exit = el('div', { class: 'exit' + (ex.code ? ' bad' : ''), text: 'exit status ' + ex.code });
+      return el('div', { class: 'ex' }, [cmdline, outline, exit]);
+    }
+
+    function entryBlock(e) {
+      const kids = [
+        el('h3', { text: e.name }),
+        el('div', { class: 'syntax', text: e.syntax }),
+        el('div', { class: 'summary', text: e.summary }),
+      ];
+      if (e.flags && e.flags.length) {
+        const rows = e.flags.map(([f, m]) => el('tr', null, [el('td', { text: f }), el('td', { text: m })]));
+        kids.push(el('table', null, rows));
+      }
+      for (const ex of e.examples) kids.push(exampleBlock(ex));
+      return el('div', { class: 'cmd', 'data-search': (e.name + ' ' + e.syntax + ' ' + e.summary + ' ' + e.category).toLowerCase() }, kids);
+    }
+
+    function render() {
+      list.innerHTML = '';
+      const byCat = {};
+      for (const e of LAB_REFERENCE) (byCat[e.category] = byCat[e.category] || []).push(e);
+      for (const cat of Object.keys(byCat).sort()) {
+        list.append(el('div', { class: 'ref-cat', text: cat }));
+        for (const e of byCat[cat]) list.append(entryBlock(e));
+      }
+      count.textContent = LAB_REFERENCE.length + ' commands, ' + LAB_REFERENCE.reduce((a, e) => a + e.examples.length, 0) + ' examples';
+    }
+
+    q.addEventListener('input', () => {
+      const term = q.value.trim().toLowerCase();
+      document.querySelectorAll('.cmd').forEach(c => c.classList.toggle('hidden', term !== '' && !c.dataset.search.includes(term)));
+    });
+
+    render();
+  })();
+  </script>
+</body>
+</html>

@@ -596,5 +596,286 @@
     },
   ];
 
+  // ---------------------------------------------------------------- extra tasks 17-26
+  const hasOptIn = (opts, o) => String(opts || '').split(',').indexOf(o) !== -1;
+  const autofsMaps = (h) => {
+    // Returns [{master, mapFile, lines}] for every /etc/auto.master.d/* file.
+    return listDir(h, '/etc/auto.master.d').map(f => {
+      const p = '/etc/auto.master.d/' + f;
+      return { master: p, lines: lines(h, p) };
+    });
+  };
+
+  const extra = [
+    {
+      id: 'users-17', num: 17, topic: 'Users', host: 'client', title: 'Create lisa in the auditors group',
+      prereqs: [],
+      scenario: 'On client, create the group auditors with GID 3000. Create user lisa with UID 3002, whose primary group is auditors, home directory /home/lisa, and password redhat.',
+      hint: 'Create the group first. useradd takes the primary group with -g, and passwd --stdin sets the password.',
+      solution: [
+        'client: groupadd -g 3000 auditors',
+        'client: useradd -u 3002 -g auditors lisa',
+        'client: echo redhat | passwd --stdin lisa',
+      ],
+      checks: [
+        chk('users-17-group', 'client', 'group auditors has GID 3000', (h) => {
+          const g = h.groups.auditors;
+          return g && g.gid === 3000 ? ok('auditors has GID 3000')
+            : bad(g ? 'auditors GID is ' + g.gid + ', expected 3000' : 'group auditors not found');
+        }),
+        chk('users-17-user', 'client', 'user lisa has UID 3002 and primary group auditors', (h) => {
+          const u = h.users.lisa, g = h.groups.auditors;
+          if (!u) return bad('user lisa not found');
+          if (u.uid !== 3002) return bad('lisa UID is ' + u.uid + ', expected 3002');
+          if (!g || u.gid !== g.gid) return bad('lisa primary group is not auditors');
+          return ok('lisa is UID 3002 with primary group auditors');
+        }),
+        chk('users-17-home', 'client', 'home directory /home/lisa exists', (h) =>
+          Sim.fs.isDir(h, '/home/lisa') ? ok('/home/lisa exists') : bad('/home/lisa directory not found')),
+        chk('users-17-password', 'client', 'password for lisa is redhat', (h) =>
+          h.users.lisa && h.users.lisa.pw === 'redhat' ? ok('password is redhat') : bad('password for lisa is not redhat')),
+      ],
+    },
+    {
+      id: 'users-18', num: 18, topic: 'Users', host: 'client', title: 'Lock lisa and set an expiry date',
+      prereqs: ['users-17'],
+      scenario: 'On client, lock the account of lisa so she cannot log in, and set her account to expire on 2027-06-30.',
+      hint: 'usermod can lock an account and set its expiry date.',
+      solution: [
+        'client: usermod -L lisa',
+        'client: usermod -e 2027-06-30 lisa',
+      ],
+      checks: [
+        chk('users-18-locked', 'client', 'account lisa is locked', (h) =>
+          h.users.lisa && h.users.lisa.locked ? ok('lisa is locked') : bad('lisa is not locked')),
+        chk('users-18-expiry', 'client', 'lisa expires on 2027-06-30', (h) =>
+          h.users.lisa && h.users.lisa.expire === '2027-06-30' ? ok('lisa expires 2027-06-30')
+            : bad('lisa expiry is ' + (h.users.lisa && h.users.lisa.expire) + ', expected 2027-06-30')),
+      ],
+    },
+    {
+      id: 'users-19', num: 19, topic: 'Users', host: 'client', title: 'Add lisa to sysadmins as a secondary group',
+      prereqs: ['users-11', 'users-17'],
+      scenario: 'On client, add lisa to the sysadmins group as a secondary group. Her primary group must stay auditors.',
+      hint: 'usermod -aG appends groups. Without -a the existing secondary groups would be replaced.',
+      solution: [
+        'client: usermod -aG sysadmins lisa',
+      ],
+      checks: [
+        chk('users-19-member', 'client', 'lisa is a member of sysadmins', (h) => {
+          const g = h.groups.sysadmins;
+          return g && (g.members || []).indexOf('lisa') !== -1 ? ok('lisa is in sysadmins')
+            : bad('lisa is not a member of sysadmins');
+        }),
+        chk('users-19-primary', 'client', 'auditors is still lisa primary group', (h) => {
+          const u = h.users.lisa, g = h.groups.auditors;
+          return u && g && u.gid === g.gid ? ok('primary group is auditors')
+            : bad('primary group of lisa is no longer auditors');
+        }),
+      ],
+    },
+    {
+      id: 'users-20', num: 20, topic: 'Users', host: 'client', title: 'Shared directory for auditors',
+      prereqs: ['users-17'],
+      scenario: 'On client, create the directory /audit owned by group auditors. Members of auditors get full access, everyone else gets no access, and new files and subdirectories inherit the group automatically.',
+      hint: 'Use chgrp for the group, and a mode with the setgid bit set for the permissions.',
+      solution: [
+        'client: mkdir -p /audit',
+        'client: chgrp auditors /audit',
+        'client: chmod 2770 /audit',
+      ],
+      checks: [
+        chk('users-20-dir', 'client', '/audit is a directory owned by group auditors', (h) => {
+          const n = Sim.fs.get(h, '/audit');
+          const g = h.groups.auditors;
+          if (!n || n.type !== 'dir') return bad('/audit directory not found');
+          return g && n.gid === g.gid ? ok('/audit is owned by auditors') : bad('/audit group is not auditors');
+        }),
+        chk('users-20-mode', 'client', '/audit mode rwxrwx--- with setgid', (h) => {
+          const n = Sim.fs.get(h, '/audit');
+          if (!n) return bad('/audit not found');
+          if ((n.mode & 0o777) !== 0o770) return bad('/audit permissions are ' + octal(n.mode) + ', expected 0770');
+          return (n.mode & 0o2000) ? ok('mode 0770 with setgid') : bad('setgid bit not set on /audit');
+        }),
+      ],
+    },
+    {
+      id: 'lvm-21', num: 21, topic: 'LVM', host: 'server', title: 'Build srvvg and mount srvdata on /srv/data',
+      prereqs: [],
+      scenario: 'On server, create the volume group srvvg with a 16M extent size from disk1 and disk2. Create the logical volume srvdata of 1G, format it ext4, and mount it persistently on /srv/data.',
+      hint: 'A volume group can take several physical volumes in one vgcreate. Remember to create the directory before you mount.',
+      solution: [
+        'server: pvcreate /dev/loop0 /dev/loop1',
+        'server: vgcreate -s 16M srvvg /dev/loop0 /dev/loop1',
+        'server: lvcreate -L 1G -n srvdata srvvg',
+        'server: mkfs.ext4 /dev/srvvg/srvdata',
+        'server: mkdir -p /srv/data',
+        "server: echo '/dev/srvvg/srvdata /srv/data ext4 defaults 0 0' >> /etc/fstab",
+        'server: mount -a',
+      ],
+      checks: [
+        chk('lvm-21-vg', 'server', 'srvvg uses disk1 and disk2 with PE 16M', (h) => {
+          const vg = lvm(h).vgs.srvvg;
+          if (!vg) return bad('VG srvvg not found');
+          const want = ['/dev/loop0', '/dev/loop1'].every(d => vg.pvs.indexOf(d) !== -1);
+          if (!want) return bad('srvvg PVs are ' + vg.pvs.join(', ') + ', expected /dev/loop0 and /dev/loop1');
+          return vg.peMB === 16 ? ok('srvvg has PVs loop0+loop1 and PE 16M') : bad('srvvg PE is ' + vg.peMB + 'M, expected 16M');
+        }),
+        chk('lvm-21-lv', 'server', 'srvdata exists and is ext4', (h) => {
+          const lv = lvm(h).lvs['srvvg/srvdata'];
+          if (!lv) return bad('LV srvvg/srvdata not found');
+          return lv.fs === 'ext4' ? ok('srvdata is ext4') : bad('srvdata filesystem is ' + lv.fs + ', expected ext4');
+        }),
+        chk('lvm-21-fstab', 'server', 'fstab mounts srvdata on /srv/data', (h) => {
+          const e = fstab(h).find(x => isLvDev(x.source, 'srvvg', 'srvdata') && x.target === '/srv/data');
+          return e ? ok('fstab has /dev/srvvg/srvdata on /srv/data') : bad('fstab entry for /srv/data missing');
+        }),
+        chk('lvm-21-mount', 'server', '/srv/data is mounted from srvdata', (h) => mountedLv(h, '/srv/data', 'srvvg', 'srvdata')),
+      ],
+    },
+    {
+      id: 'lvm-22', num: 22, topic: 'LVM', host: 'server', title: 'Grow srvdata and keep its data',
+      prereqs: ['lvm-21'],
+      scenario: 'On server, put the file /srv/data/keep.txt containing "keep me" on srvdata. Then grow srvdata to 1.5G (1536M) and grow its filesystem in the same step, so the file is still there.',
+      hint: 'lvextend -r grows the logical volume and its filesystem together.',
+      solution: [
+        "server: echo 'keep me' > /srv/data/keep.txt",
+        'server: lvextend -r -L 1536M srvvg/srvdata',
+      ],
+      checks: [
+        chk('lvm-22-size', 'server', 'srvdata is 1536M', (h) => {
+          const lv = lvm(h).lvs['srvvg/srvdata'];
+          if (!lv) return bad('LV srvvg/srvdata not found');
+          return lv.sizeMB === 1536 ? ok('srvdata is 1536M') : bad('srvdata size is ' + lv.sizeMB + 'M, expected 1536M');
+        }),
+        chk('lvm-22-data', 'server', '/srv/data/keep.txt still exists', (h) =>
+          Sim.fs.isFile(h, '/srv/data/keep.txt') ? ok('keep.txt is still there') : bad('/srv/data/keep.txt is missing')),
+        chk('lvm-22-mount', 'server', '/srv/data still mounted', (h) => mountedLv(h, '/srv/data', 'srvvg', 'srvdata')),
+      ],
+    },
+    {
+      id: 'lvm-23', num: 23, topic: 'LVM', host: 'server', title: 'Persistent 256M swap on srvswap',
+      prereqs: ['lvm-21'],
+      scenario: 'On server, create a 256M swap logical volume named srvswap in srvvg and make it active persistently across reboots.',
+      hint: 'Swap needs mkswap before swapon, and an fstab entry with type swap.',
+      solution: [
+        'server: lvcreate -L 256M -n srvswap srvvg',
+        'server: mkswap /dev/srvvg/srvswap',
+        "server: echo '/dev/srvvg/srvswap swap swap defaults 0 0' >> /etc/fstab",
+        'server: swapon -a',
+      ],
+      checks: [
+        chk('lvm-23-lv', 'server', 'srvswap is 256M swap', (h) => {
+          const lv = lvm(h).lvs['srvvg/srvswap'];
+          if (!lv) return bad('LV srvvg/srvswap not found');
+          if (lv.sizeMB !== 256) return bad('srvswap size is ' + lv.sizeMB + 'M, expected 256M');
+          return lv.fs === 'swap' ? ok('srvswap is 256M swap') : bad('srvswap has no swap signature');
+        }),
+        chk('lvm-23-fstab', 'server', 'fstab has a swap entry for srvswap', (h) => {
+          const e = fstab(h).find(x => isLvDev(x.source, 'srvvg', 'srvswap') && x.fstype === 'swap');
+          return e ? ok('fstab swap entry present') : bad('fstab swap entry for srvswap missing');
+        }),
+        chk('lvm-23-active', 'server', 'srvswap is active now', (h) =>
+          (h.active.swaps || []).indexOf('/dev/srvvg/srvswap') !== -1 ? ok('swap is active')
+            : bad('srvswap is not active')),
+      ],
+    },
+    {
+      id: 'nfs-24', num: 24, topic: 'NFS', host: 'server', title: 'Export srvdata read-only to the client',
+      prereqs: ['lvm-21'],
+      scenario: 'On server, export /srv/data read-only to the client at 192.168.50.20 and make sure nfs-server is enabled and running.',
+      hint: 'The export options are written in parentheses after the client address. ro means read-only.',
+      solution: [
+        "server: echo '/srv/data 192.168.50.20(ro,sync)' >> /etc/exports",
+        'server: exportfs -ra',
+        'server: systemctl enable --now nfs-server',
+      ],
+      checks: [
+        chk('nfs-24-line', 'server', '/etc/exports has /srv/data read-only for 192.168.50.20', (h) => {
+          const e = Sim.parseExports(h).find(x => x.path === '/srv/data');
+          if (!e) return bad('no export line for /srv/data');
+          const c = e.clients.find(x => x.spec === '192.168.50.20');
+          if (!c) return bad('/srv/data is not exported to 192.168.50.20');
+          return hasOptIn(c.opts, 'ro') ? ok('/srv/data exported read-only to 192.168.50.20')
+            : bad('export options are ' + c.opts + ', expected ro');
+        }),
+        chk('nfs-24-applied', 'server', '/srv/data export is applied', (h) =>
+          (h.active.exportsApplied || []).some(e => e.path === '/srv/data') ? ok('export applied')
+            : bad('/srv/data is not in the applied exports (run exportfs -ra)')),
+        chk('nfs-24-service', 'server', 'nfs-server enabled and running', (h) => {
+          const en = h.units['nfs-server'] && h.units['nfs-server'].enabled;
+          const act = h.active.services['nfs-server'] && h.active.services['nfs-server'].active;
+          if (!en) return bad('nfs-server is not enabled');
+          return act ? ok('nfs-server enabled and active') : bad('nfs-server is not running');
+        }),
+      ],
+    },
+    {
+      id: 'nfs-25', num: 25, topic: 'NFS', host: 'client', title: 'Mount srvdata read-only on the client',
+      prereqs: ['nfs-24'],
+      scenario: 'On client, mount server:/srv/data read-only on /mnt/srvdata, persistently across reboots, using the _netdev option.',
+      hint: 'The fstab options field can hold ro and _netdev separated by commas. The mount point must exist first.',
+      solution: [
+        'client: mkdir -p /mnt/srvdata',
+        "client: echo 'server:/srv/data /mnt/srvdata nfs ro,_netdev 0 0' >> /etc/fstab",
+        'client: mount -a',
+      ],
+      checks: [
+        chk('nfs-25-fstab', 'client', 'fstab mounts server:/srv/data read-only with _netdev', (h) => {
+          const e = fstab(h).find(x => x.source === 'server:/srv/data' && x.target === '/mnt/srvdata');
+          if (!e) return bad('fstab entry for server:/srv/data on /mnt/srvdata missing');
+          if (!hasOptIn(e.opts, 'ro')) return bad('fstab entry is not read-only (opts: ' + e.opts + ')');
+          if (!hasOptIn(e.opts, '_netdev')) return bad('fstab entry is missing _netdev');
+          return ok('fstab has ro,_netdev entry');
+        }),
+        chk('nfs-25-mount', 'client', '/mnt/srvdata is mounted read-only from server:/srv/data', (h) => {
+          const m = mounts(h).find(x => x.target === '/mnt/srvdata');
+          if (!m) return bad('/mnt/srvdata not mounted');
+          if (m.source !== 'server:/srv/data') return bad('/mnt/srvdata mounted from ' + m.source);
+          return hasOptIn(m.opts, 'ro') ? ok('mounted read-only') : bad('mount is not read-only');
+        }),
+      ],
+    },
+    {
+      id: 'autofs-26', num: 26, topic: 'AutoFS', host: 'client', title: 'Direct automount of srvdata at /mnt/srvauto',
+      prereqs: ['nfs-24', 'autofs-8'],
+      scenario: 'On client, add an AutoFS direct map so that server:/srv/data is mounted read-only at /mnt/srvauto when it is accessed. Put the map in its own file in /etc/auto.master.d/, and make sure autofs is running.',
+      hint: 'A direct map line in auto.master.d uses /- as the mount point and names a map file. The map file has the mount point, the options and the location.',
+      solution: [
+        'client: mkdir -p /mnt/srvauto',
+        "client: echo '/- /etc/auto.srv' > /etc/auto.master.d/srv.autofs",
+        "client: echo '/mnt/srvauto -ro server:/srv/data' > /etc/auto.srv",
+        'client: systemctl restart autofs',
+        'client: ls /mnt/srvauto',
+      ],
+      checks: [
+        chk('autofs-26-master', 'client', 'auto.master.d has a direct map line /- to a map file', (h) => {
+          const maps = autofsMaps(h).filter(m => m.lines.some(l => /^\/-\s+\S+/.test(l)));
+          return maps.length ? ok(maps[0].master + ' has a direct map') : bad('no /- direct map in /etc/auto.master.d');
+        }),
+        chk('autofs-26-map', 'client', 'direct map mounts server:/srv/data read-only at /mnt/srvauto', (h) => {
+          // Look at every direct map file; any of them may hold the /mnt/srvauto entry.
+          const found = [];
+          for (const m of autofsMaps(h)) {
+            for (const l of m.lines) {
+              const dm = l.match(/^\/-\s+(\S+)/);
+              if (!dm) continue;
+              for (const ml of lines(h, dm[1])) if (/^\/mnt\/srvauto\s+/.test(ml)) found.push(ml);
+            }
+          }
+          if (!found.length) return bad('no direct map entry for /mnt/srvauto');
+          const f = found[0].split(/\s+/);
+          if (!hasOptIn(f[1].replace(/^-/, ''), 'ro')) return bad('/mnt/srvauto is not read-only');
+          if (f[2] !== 'server:/srv/data') return bad('/mnt/srvauto location is ' + f[2] + ', expected server:/srv/data');
+          return ok('direct map for /mnt/srvauto from server:/srv/data (ro)');
+        }),
+        chk('autofs-26-running', 'client', 'autofs is running on client', (h) =>
+          h.active.services.autofs && h.active.services.autofs.active ? ok('autofs is active')
+            : bad('autofs is not running')),
+      ],
+    },
+  ];
+
+  tasks.push.apply(tasks, extra);
   window.LAB_TASKS = tasks;
 })();
