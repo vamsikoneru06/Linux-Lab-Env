@@ -23,7 +23,6 @@
       <span id="mock-timer" class="timer hidden" aria-live="polite"></span>
       <button id="btn-end" class="btn hidden">End exam</button>
       <a class="btn" href="reference.html" style="text-decoration:none;color:var(--ink)">Command reference</a>
-      <button id="btn-sandbox" class="btn">Load sandbox</button>
       <span class="divider"></span>
       <button id="btn-reset" class="btn danger">Reset lab</button>
     </div>
@@ -37,7 +36,7 @@
         <button class="tab active" data-host="server"><span class="dot server"></span>server</button>
         <button class="tab" data-host="client"><span class="dot client"></span>client</button>
         <span class="spacer"></span>
-        <span class="disks">/dev/loop0 = disk1 - /dev/loop1 = disk2 - /dev/loop2 = disk3</span>
+        <span class="disks">loop0-2 = disk1-3 (exam) - loop3-5 = disk4-6 (examples)</span>
       </div>
       <div class="term-wrap">
         <div id="term-server" class="term"></div>
@@ -55,7 +54,7 @@
   <script src="sim/storage.js"></script>
   <script src="sim/users.js"></script>
   <script src="sim/net.js"></script>
-  <script src="sim/sandbox.js"></script>
+  <script src="sim/preload.js"></script>
   <script src="tasks.js"></script>
   <script src="app.js"></script>
 </body>

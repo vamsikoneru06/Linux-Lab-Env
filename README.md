@@ -31,7 +31,7 @@ Then open <http://127.0.0.1:3000> in your browser. The server binds to 127.0.0.1
 - **Check all**: runs every check.
 - **Simulate reboot**: rebuilds runtime state from the persistent config (fstab, exports, enabled services, autofs maps), then re-runs all checks. Use it to test persistence.
 - **Reset lab**: destroys everything and rebuilds a clean lab. Progress is lost.
-- **Load sandbox**: a practice lab, separate from the exam lab. It adds three more 2G disks per host (`/dev/loop3`-`loop5`, disk4-disk6) and preloads examples: volume group `sandvg` with `docs` mounted on `/mnt/sandbox`, a swap LV, user `alice` (password `redhat`), and an NFS mount on the client at `/mnt/nfs`. Clears check results.
+- **Built-in examples**: every lab starts with three extra 2G disks per host (`/dev/loop3`-`loop5`, disk4-disk6) and some ready-made volumes to try commands on: volume group `sandvg` with an ext4 filesystem mounted on `/mnt/sandbox` (with a test file), a swap LV, user `demouser` (UID 4001, password `redhat`), and on the client a second volume group with an XFS LV. These use names and disks the exam tasks don't touch, so the 26 tasks still start clean. NFS is not preloaded.
 - **Mock exam**: resets the lab, picks 8 random tasks (with their prerequisites), starts a 60-minute timer and hides hints and solutions. At the end it simulates a reboot and grades every check.
 
 Progress and lab state are saved in this browser's localStorage. Other browsers and other machines start fresh.

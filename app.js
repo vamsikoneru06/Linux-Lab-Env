@@ -285,21 +285,6 @@
     status('Lab reset.');
   }
 
-  // Practice sandbox: preloaded disks, volumes, a user and an NFS mount. Separate from the
-  // exam lab; it clears check results and any running mock exam.
-  function loadSandbox() {
-    if (!confirm('Load the practice sandbox? This replaces your current lab and clears check results.')) return;
-    Sim.buildSandbox();
-    Sim.save();
-    progress = { checks: {}, mock: null };
-    saveProgress();
-    stopTimer();
-    allTerms(t => { t.out.textContent = ''; t.session = { user: 'root', cwd: '/root', lastStatus: 0 }; renderPrompt(t); });
-    allTerms(t => append(t, 'Sandbox loaded. Extra disks: /dev/loop3-5 (disk4-6). Preloaded: sandvg with docs mounted on /mnt/sandbox, a swap LV, user alice, and an NFS mount on the client at /mnt/nfs.\n\n'));
-    renderTasks();
-    status('Sandbox loaded. Check results were cleared.');
-  }
-
   // ---------------------------------------------------------------- mock exam
   let timerId = null;
 
@@ -397,7 +382,6 @@
     $('#btn-check-all').addEventListener('click', () => checkAll('Check all'));
     $('#btn-reboot').addEventListener('click', reboot);
     $('#btn-reset').addEventListener('click', resetLab);
-    $('#btn-sandbox').addEventListener('click', loadSandbox);
     $('#btn-mock').addEventListener('click', startMock);
     $('#btn-end').addEventListener('click', () => { if (confirm('End the exam now and grade it?')) finishMock('ended early'); });
 

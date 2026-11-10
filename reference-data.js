@@ -414,9 +414,9 @@ window.LAB_REFERENCE = [
    {
     "host": "server",
     "cmd": "chown demo:users /srv/projects/run.sh && ls -l /srv/projects/run.sh",
-    "out": "-rw-r--r-- demo users /srv/projects/run.sh\n",
-    "err": "",
-    "code": 0
+    "out": "",
+    "err": "chown: invalid user: 'demo'\n",
+    "code": 1
    }
   ]
  },
@@ -474,9 +474,9 @@ window.LAB_REFERENCE = [
    {
     "host": "server",
     "cmd": "id demo",
-    "out": "uid=2001(demo) gid=2001(demo) groups=2001(demo)\n",
-    "err": "",
-    "code": 0
+    "out": "",
+    "err": "id: 'demo': no such user\n",
+    "code": 1
    }
   ]
  },
@@ -497,9 +497,9 @@ window.LAB_REFERENCE = [
    {
     "host": "server",
     "cmd": "groups demo",
-    "out": "demo : demo\n",
-    "err": "",
-    "code": 0
+    "out": "",
+    "err": "groups: 'demo': no such user\n",
+    "code": 1
    }
   ]
  },
@@ -559,7 +559,7 @@ window.LAB_REFERENCE = [
    {
     "host": "server",
     "cmd": "date",
-    "out": "Wed Nov 11 2026 00:06:28 GMT+0530 (India Standard Time)\n",
+    "out": "Wed Nov 11 2026 00:17:19 GMT+0530 (India Standard Time)\n",
     "err": "",
     "code": 0
    }
@@ -732,7 +732,7 @@ window.LAB_REFERENCE = [
    {
     "host": "server",
     "cmd": "useradd -s /sbin/nologin sarah && getent passwd sarah",
-    "out": "sarah:x:1000:1000::/home/sarah:/sbin/nologin\n",
+    "out": "sarah:x:1000:1001::/home/sarah:/sbin/nologin\n",
     "err": "",
     "code": 0
    },
@@ -883,14 +883,14 @@ window.LAB_REFERENCE = [
    {
     "host": "server",
     "cmd": "gpasswd -a harry devops && getent group devops",
-    "out": "Adding user harry to group devops\ndevops:x:1001:harry\n",
+    "out": "Adding user harry to group devops\ndevops:x:1002:harry\n",
     "err": "",
     "code": 0
    },
    {
     "host": "server",
     "cmd": "gpasswd -d harry devops && getent group devops",
-    "out": "Removing user harry from group devops\ndevops:x:1001:\n",
+    "out": "Removing user harry from group devops\ndevops:x:1002:\n",
     "err": "",
     "code": 0
    }
@@ -1019,7 +1019,7 @@ window.LAB_REFERENCE = [
    {
     "host": "server",
     "cmd": "getent group sysadmins",
-    "out": "sysadmins:x:1000:\n",
+    "out": "sysadmins:x:1001:\n",
     "err": "",
     "code": 0
    }
@@ -1120,7 +1120,7 @@ window.LAB_REFERENCE = [
    {
     "host": "server",
     "cmd": "pvcreate /dev/loop0 && pvs",
-    "out": "Physical volume \"/dev/loop0\" successfully created.\nPV          VG  Fmt   Attr  PSize  PFree\n/dev/loop0      lvm2  ---   1G     1G\n",
+    "out": "Physical volume \"/dev/loop0\" successfully created.\nPV          VG      Fmt   Attr  PSize  PFree\n/dev/loop0          lvm2  ---   1G     1G\n/dev/loop3  sandvg  lvm2  a--   2G     768M\n",
     "err": "",
     "code": 0
    },
@@ -1143,7 +1143,7 @@ window.LAB_REFERENCE = [
    {
     "host": "server",
     "cmd": "pvs",
-    "out": "PV          VG  Fmt   Attr  PSize  PFree\n/dev/loop0      lvm2  ---   1G     1G\n",
+    "out": "PV          VG      Fmt   Attr  PSize  PFree\n/dev/loop0          lvm2  ---   1G     1G\n/dev/loop3  sandvg  lvm2  a--   2G     768M\n",
     "err": "",
     "code": 0
    }
@@ -1164,7 +1164,7 @@ window.LAB_REFERENCE = [
    {
     "host": "server",
     "cmd": "vgcreate -s 16M datavg /dev/loop0 && vgs",
-    "out": "Volume group \"datavg\" successfully created\nVG      #PV  #LV  Attr    VSize  VFree\ndatavg  1    0    wz--n-  1G     1G\n",
+    "out": "Volume group \"datavg\" successfully created\nVG      #PV  #LV  Attr    VSize  VFree\ndatavg  1    0    wz--n-  1G     1G\nsandvg  1    2    wz--n-  2G     768M\n",
     "err": "",
     "code": 0
    }
@@ -1180,7 +1180,7 @@ window.LAB_REFERENCE = [
    {
     "host": "server",
     "cmd": "vgs",
-    "out": "VG      #PV  #LV  Attr    VSize  VFree\ndatavg  1    0    wz--n-  1G     1G\n",
+    "out": "VG      #PV  #LV  Attr    VSize  VFree\ndatavg  1    0    wz--n-  1G     1G\nsandvg  1    2    wz--n-  2G     768M\n",
     "err": "",
     "code": 0
    }
@@ -1196,7 +1196,7 @@ window.LAB_REFERENCE = [
    {
     "host": "server",
     "cmd": "pvcreate /dev/loop1 && vgextend datavg /dev/loop1 && vgs",
-    "out": "Physical volume \"/dev/loop1\" successfully created.\nVolume group \"datavg\" successfully extended\nVG      #PV  #LV  Attr    VSize  VFree\ndatavg  2    0    wz--n-  2G     2G\n",
+    "out": "Physical volume \"/dev/loop1\" successfully created.\nVolume group \"datavg\" successfully extended\nVG      #PV  #LV  Attr    VSize  VFree\ndatavg  2    0    wz--n-  2G     2G\nsandvg  1    2    wz--n-  2G     768M\n",
     "err": "",
     "code": 0
    }
@@ -1225,14 +1225,14 @@ window.LAB_REFERENCE = [
    {
     "host": "server",
     "cmd": "lvcreate -l 30 -n datalv datavg && lvs",
-    "out": "Logical volume \"datalv\" created.\nLV      VG      Attr        LSize  Path\ndatalv  datavg  -wi-a-----  480M   /dev/datavg/datalv\n",
+    "out": "Logical volume \"datalv\" created.\nLV      VG      Attr        LSize  Path\ndatalv  datavg  -wi-a-----  480M   /dev/datavg/datalv\ndocs    sandvg  -wi-a-----  1G     /dev/sandvg/docs\nswap1   sandvg  -wi-a-----  256M   /dev/sandvg/swap1\n",
     "err": "",
     "code": 0
    },
    {
     "host": "server",
     "cmd": "lvcreate -L 512M -n swaplv datavg && lvs",
-    "out": "Logical volume \"swaplv\" created.\nLV      VG      Attr        LSize  Path\ndatalv  datavg  -wi-a-----  480M   /dev/datavg/datalv\nswaplv  datavg  -wi-a-----  512M   /dev/datavg/swaplv\n",
+    "out": "Logical volume \"swaplv\" created.\nLV      VG      Attr        LSize  Path\ndatalv  datavg  -wi-a-----  480M   /dev/datavg/datalv\nswaplv  datavg  -wi-a-----  512M   /dev/datavg/swaplv\ndocs    sandvg  -wi-a-----  1G     /dev/sandvg/docs\nswap1   sandvg  -wi-a-----  256M   /dev/sandvg/swap1\n",
     "err": "",
     "code": 0
    }
@@ -1248,7 +1248,7 @@ window.LAB_REFERENCE = [
    {
     "host": "server",
     "cmd": "lvs",
-    "out": "LV      VG      Attr        LSize  Path\ndatalv  datavg  -wi-a-----  480M   /dev/datavg/datalv\n",
+    "out": "LV      VG      Attr        LSize  Path\ndatalv  datavg  -wi-a-----  480M   /dev/datavg/datalv\ndocs    sandvg  -wi-a-----  1G     /dev/sandvg/docs\nswap1   sandvg  -wi-a-----  256M   /dev/sandvg/swap1\n",
     "err": "",
     "code": 0
    }
@@ -1273,7 +1273,7 @@ window.LAB_REFERENCE = [
    {
     "host": "server",
     "cmd": "lvextend -L 800M datavg/datalv && lvs",
-    "out": "Size of logical volume datavg/datalv changed from 480M (30 extents) to 800M (50 extents).\nLogical volume datavg/datalv successfully resized.\nLV      VG      Attr        LSize  Path\ndatalv  datavg  -wi-a-----  800M   /dev/datavg/datalv\n",
+    "out": "Size of logical volume datavg/datalv changed from 480M (30 extents) to 800M (50 extents).\nLogical volume datavg/datalv successfully resized.\nLV      VG      Attr        LSize  Path\ndatalv  datavg  -wi-a-----  800M   /dev/datavg/datalv\ndocs    sandvg  -wi-a-----  1G     /dev/sandvg/docs\nswap1   sandvg  -wi-a-----  256M   /dev/sandvg/swap1\n",
     "err": "",
     "code": 0
    }
@@ -1305,7 +1305,7 @@ window.LAB_REFERENCE = [
    {
     "host": "server",
     "cmd": "umount /mnt && lvreduce -r -L 256M datavg/swaplv && lvs",
-    "out": "Size of logical volume datavg/swaplv changed from 512M (32 extents) to 256M (16 extents).\nLogical volume datavg/swaplv successfully resized.\nLV      VG      Attr        LSize  Path\nswaplv  datavg  -wi-a-----  256M   /dev/datavg/swaplv\n",
+    "out": "Size of logical volume datavg/swaplv changed from 512M (32 extents) to 256M (16 extents).\nLogical volume datavg/swaplv successfully resized.\nLV      VG      Attr        LSize  Path\nswaplv  datavg  -wi-a-----  256M   /dev/datavg/swaplv\ndocs    sandvg  -wi-a-----  1G     /dev/sandvg/docs\nswap1   sandvg  -wi-a-----  256M   /dev/sandvg/swap1\n",
     "err": "",
     "code": 0
    }
@@ -1326,7 +1326,7 @@ window.LAB_REFERENCE = [
    {
     "host": "server",
     "cmd": "mkfs.xfs /dev/datavg/datalv && blkid",
-    "out": "xfs filesystem created on /dev/datavg/datalv (UUID=1d9caac6-f5d3-5394-7df6-c2d3c075e2ae)\n/dev/datavg/datalv: UUID=\"1d9caac6-f5d3-5394-7df6-c2d3c075e2ae\" TYPE=\"xfs\"\n",
+    "out": "xfs filesystem created on /dev/datavg/datalv (UUID=c67656ab-de1c-57e5-a0df-1b4312d5624a)\n/dev/sandvg/docs: UUID=\"e95b50a2-71f5-4bd6-b177-3861eb964889\" TYPE=\"ext4\"\n/dev/sandvg/swap1: UUID=\"b091de74-6623-5a73-4656-66af45f0b44d\" TYPE=\"swap\"\n/dev/datavg/datalv: UUID=\"c67656ab-de1c-57e5-a0df-1b4312d5624a\" TYPE=\"xfs\"\n",
     "err": "",
     "code": 0
    },
@@ -1358,7 +1358,7 @@ window.LAB_REFERENCE = [
    {
     "host": "server",
     "cmd": "mkfs.ext4 /dev/datavg/backuplv && blkid",
-    "out": "ext4 filesystem created on /dev/datavg/backuplv (UUID=aef9063b-490e-035b-9686-64f483a17212)\n/dev/datavg/backuplv: UUID=\"aef9063b-490e-035b-9686-64f483a17212\" TYPE=\"ext4\"\n",
+    "out": "ext4 filesystem created on /dev/datavg/backuplv (UUID=f41a5111-82dd-49a5-9aad-645139cc2019)\n/dev/sandvg/docs: UUID=\"c47a75fa-61fe-36aa-a8e5-520b2b884536\" TYPE=\"ext4\"\n/dev/sandvg/swap1: UUID=\"949b0dd3-9fda-9296-6a4f-aaa1da431d18\" TYPE=\"swap\"\n/dev/datavg/backuplv: UUID=\"f41a5111-82dd-49a5-9aad-645139cc2019\" TYPE=\"ext4\"\n",
     "err": "",
     "code": 0
    }
@@ -1374,7 +1374,7 @@ window.LAB_REFERENCE = [
    {
     "host": "server",
     "cmd": "mkswap /dev/datavg/swaplv && blkid",
-    "out": "Setting up swapspace version 1, size = 524288 KiB\nno label, UUID=4d243c97-9ad4-3d4d-8545-a488a001890e\n/dev/datavg/swaplv: UUID=\"4d243c97-9ad4-3d4d-8545-a488a001890e\" TYPE=\"swap\"\n",
+    "out": "Setting up swapspace version 1, size = 524288 KiB\nno label, UUID=ef4b0006-3dbd-e91c-5f36-14e94fe8cb75\n/dev/sandvg/docs: UUID=\"f5217092-7924-6cd6-9bfc-1274fe15c7a6\" TYPE=\"ext4\"\n/dev/sandvg/swap1: UUID=\"1cdb24b3-cf9f-1ee3-de2e-2981a1039668\" TYPE=\"swap\"\n/dev/datavg/swaplv: UUID=\"ef4b0006-3dbd-e91c-5f36-14e94fe8cb75\" TYPE=\"swap\"\n",
     "err": "",
     "code": 0
    }
@@ -1395,14 +1395,14 @@ window.LAB_REFERENCE = [
    {
     "host": "server",
     "cmd": "swapon /dev/datavg/swaplv && swapon",
-    "out": "NAME                 TYPE       SIZE USED PRIO\n/dev/datavg/swaplv   partition   512M 0B   -2\n",
+    "out": "NAME                 TYPE       SIZE USED PRIO\n/dev/sandvg/swap1    partition   256M 0B   -2\n/dev/datavg/swaplv   partition   512M 0B   -2\n",
     "err": "",
     "code": 0
    },
    {
     "host": "server",
     "cmd": "swapon -a && swapon",
-    "out": "NAME                 TYPE       SIZE USED PRIO\n/dev/datavg/swaplv   partition   512M 0B   -2\n",
+    "out": "NAME                 TYPE       SIZE USED PRIO\n/dev/sandvg/swap1    partition   256M 0B   -2\n/dev/datavg/swaplv   partition   512M 0B   -2\n",
     "err": "",
     "code": 0
    }
@@ -1418,7 +1418,7 @@ window.LAB_REFERENCE = [
    {
     "host": "server",
     "cmd": "swapoff /dev/datavg/swaplv && swapon",
-    "out": "NAME                 TYPE       SIZE USED PRIO\n",
+    "out": "NAME                 TYPE       SIZE USED PRIO\n/dev/sandvg/swap1    partition   256M 0B   -2\n",
     "err": "",
     "code": 0
    }
@@ -1447,7 +1447,7 @@ window.LAB_REFERENCE = [
    {
     "host": "server",
     "cmd": "mount /dev/datavg/datalv /data && mount",
-    "out": "/dev/datavg/datalv on /data type xfs (defaults)\n",
+    "out": "/dev/sandvg/docs on /mnt/sandbox type ext4 (defaults)\n/dev/datavg/datalv on /data type xfs (defaults)\n",
     "err": "",
     "code": 0
    },
@@ -1470,7 +1470,7 @@ window.LAB_REFERENCE = [
    {
     "host": "server",
     "cmd": "umount /data && echo unmounted && mount || echo nothing mounted",
-    "out": "unmounted\n",
+    "out": "unmounted\n/dev/sandvg/docs on /mnt/sandbox type ext4 (defaults)\n",
     "err": "",
     "code": 0
    },
@@ -1498,7 +1498,7 @@ window.LAB_REFERENCE = [
    {
     "host": "server",
     "cmd": "df -h",
-    "out": "Filesystem          Size  Used  Avail  Use%  Mounted on\n/dev/datavg/datalv  480M  15M   465M   3%    /data\n",
+    "out": "Filesystem          Size  Used  Avail  Use%  Mounted on\n/dev/sandvg/docs    1G    31M   993M   3%    /mnt/sandbox\n/dev/datavg/datalv  480M  15M   465M   3%    /data\n",
     "err": "",
     "code": 0
    }
@@ -1514,7 +1514,7 @@ window.LAB_REFERENCE = [
    {
     "host": "server",
     "cmd": "lsblk",
-    "out": "NAME             SIZE  LABEL  TYPE  FSTYPE       MOUNTPOINT\nloop0            1G    disk1  disk  LVM2_member  \n└─datavg-datalv  480M         lvm                \nloop1            1G    disk2  disk               \nloop2            1G    disk3  disk               \n",
+    "out": "NAME             SIZE  LABEL  TYPE  FSTYPE       MOUNTPOINT\nloop0            1G    disk1  disk  LVM2_member  \n└─datavg-datalv  480M         lvm                \nloop1            1G    disk2  disk               \nloop2            1G    disk3  disk               \nloop3            2G    disk4  disk  LVM2_member  \n├─sandvg-docs    1G           lvm   ext4         /mnt/sandbox\n└─sandvg-swap1   256M         lvm   swap         \nloop4            2G    disk5  disk               \nloop5            2G    disk6  disk               \n",
     "err": "",
     "code": 0
    }
@@ -1530,7 +1530,7 @@ window.LAB_REFERENCE = [
    {
     "host": "server",
     "cmd": "blkid",
-    "out": "/dev/datavg/datalv: UUID=\"213ec8d0-979c-fc96-6de3-71c022a45ad9\" TYPE=\"xfs\"\n",
+    "out": "/dev/sandvg/docs: UUID=\"cd59eeaa-7e1a-450f-9a04-4c8396d4116c\" TYPE=\"ext4\"\n/dev/sandvg/swap1: UUID=\"7bf844d3-6ae2-36ff-cbe5-eea77204982a\" TYPE=\"swap\"\n/dev/datavg/datalv: UUID=\"b2b86826-3841-b5cf-5316-d05dd98729de\" TYPE=\"xfs\"\n",
     "err": "",
     "code": 0
    }
