@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RHLab - RHCSA practice</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><rect width="28" height="28" fill="#0b0d10"/><path d="M7 8.5l5.5 5.5L7 19.5" fill="none" stroke="#fff" stroke-width="2.4"/><rect x="14.5" y="18" width="7" height="2.6" fill="#5c85ff"/></svg>
+      <div class="wordmark"><span class="b">RH</span><span>Lab</span></div>
+      <span class="divider"></span>
+      <span class="sub">simulated RHEL 9 - no disks, no VMs</span>
+    </div>
+    <div class="toolbar">
+      <button id="btn-check-all" class="btn primary">Check all</button>
+      <button id="btn-reboot" class="btn">Simulate reboot</button>
+      <button id="btn-mock" class="btn">Mock exam</button>
+      <span id="mock-timer" class="timer hidden" aria-live="polite"></span>
+      <button id="btn-end" class="btn hidden">End exam</button>
+      <span class="divider"></span>
+      <button id="btn-reset" class="btn danger">Reset lab</button>
+    </div>
+  </header>
+
+  <main>
+    <section id="tasks" class="panel tasks" aria-label="Tasks"></section>
+
+    <section class="panel term-panel" aria-label="Terminals">
+      <div class="tabs">
+        <button class="tab active" data-host="server"><span class="dot server"></span>server</button>
+        <button class="tab" data-host="client"><span class="dot client"></span>client</button>
+        <span class="spacer"></span>
+        <span class="disks">/dev/loop0 = disk1 - /dev/loop1 = disk2 - /dev/loop2 = disk3</span>
+      </div>
+      <div class="term-wrap">
+        <div id="term-server" class="term"></div>
+        <div id="term-client" class="term hidden"></div>
+        <div id="boot" class="boot hidden" role="status" aria-live="polite">
+          <div class="boot-head"><span>Simulated reboot</span><span class="muted">server + client</span></div>
+          <div class="boot-lines"></div>
+        </div>
+      </div>
+      <div id="status" class="status"></div>
+    </section>
+  </main>
+
+  <script src="sim/core.js"></script>
+  <script src="sim/storage.js"></script>
+  <script src="sim/users.js"></script>
+  <script src="sim/net.js"></script>
+  <script src="tasks.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

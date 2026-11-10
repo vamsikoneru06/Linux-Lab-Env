@@ -1,0 +1,13 @@
+{
+  "name": "rhlab",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Browser-based simulated RHEL lab for LVM, NFS, AutoFS, Users and Groups practice",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
