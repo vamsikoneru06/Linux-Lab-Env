@@ -349,6 +349,16 @@
 
   reg('swapon', rootOnly(ctx => {
     const h = ctx.host;
+    if (!ctx.args.length) {
+      // Like `swapon --show`: list active swap areas.
+      ctx.out('NAME                 TYPE       SIZE USED PRIO\n');
+      for (const dev of h.active.swaps) {
+        const key = lvKey(h, dev);
+        const lv = key && h.lvm.lvs[key];
+        ctx.out(dev.padEnd(21) + 'partition ' + (lv ? lv.sizeMB + 'M' : '-').padStart(6) + ' 0B   -2\n');
+      }
+      return 0;
+    }
     const a = parseArgs(ctx.args, '');
     if (a.flags.a) {
       let code = 0;

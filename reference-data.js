@@ -21,8 +21,8 @@ window.LAB_REFERENCE = [
    },
    {
     "host": "server",
-    "cmd": "echo -n no newline; echo done",
-    "out": "no newlinedone\n",
+    "cmd": "echo -n no newline; echo \" done\"",
+    "out": "no newline done\n",
     "err": "",
     "code": 0
    }
@@ -53,8 +53,8 @@ window.LAB_REFERENCE = [
   "examples": [
    {
     "host": "server",
-    "cmd": "pwd",
-    "out": "/root\n",
+    "cmd": "cd /etc && pwd",
+    "out": "/etc\n",
     "err": "",
     "code": 0
    }
@@ -69,28 +69,14 @@ window.LAB_REFERENCE = [
   "examples": [
    {
     "host": "server",
-    "cmd": "cd /etc",
-    "out": "",
-    "err": "",
-    "code": 0
-   },
-   {
-    "host": "server",
-    "cmd": "pwd",
+    "cmd": "cd /etc && pwd",
     "out": "/etc\n",
     "err": "",
     "code": 0
    },
    {
     "host": "server",
-    "cmd": "cd",
-    "out": "",
-    "err": "",
-    "code": 0
-   },
-   {
-    "host": "server",
-    "cmd": "pwd",
+    "cmd": "cd && pwd",
     "out": "/root\n",
     "err": "",
     "code": 0
@@ -244,15 +230,8 @@ window.LAB_REFERENCE = [
    },
    {
     "host": "server",
-    "cmd": "echo second | tee -a /root/tee.txt",
-    "out": "second\n",
-    "err": "",
-    "code": 0
-   },
-   {
-    "host": "server",
-    "cmd": "cat /root/tee.txt",
-    "out": "first\nsecond\n",
+    "cmd": "echo second | tee -a /root/tee.txt && cat /root/tee.txt",
+    "out": "second\nfirst\nsecond\n",
     "err": "",
     "code": 0
    }
@@ -272,15 +251,15 @@ window.LAB_REFERENCE = [
   "examples": [
    {
     "host": "server",
-    "cmd": "mkdir /srv/projects",
-    "out": "",
+    "cmd": "mkdir /srv/projects && ls /srv",
+    "out": "projects\n",
     "err": "",
     "code": 0
    },
    {
     "host": "server",
-    "cmd": "mkdir -p /srv/projects/team/a",
-    "out": "",
+    "cmd": "mkdir -p /srv/projects/team/a && ls /srv/projects/team",
+    "out": "a\n",
     "err": "",
     "code": 0
    },
@@ -302,14 +281,7 @@ window.LAB_REFERENCE = [
   "examples": [
    {
     "host": "server",
-    "cmd": "touch /srv/projects/notes.txt",
-    "out": "",
-    "err": "",
-    "code": 0
-   },
-   {
-    "host": "server",
-    "cmd": "ls /srv/projects",
+    "cmd": "touch /srv/projects/notes.txt && ls /srv/projects",
     "out": "notes.txt\n",
     "err": "",
     "code": 0
@@ -330,8 +302,8 @@ window.LAB_REFERENCE = [
   "examples": [
    {
     "host": "server",
-    "cmd": "cp /share/readme.txt /srv/projects/",
-    "out": "",
+    "cmd": "cp /share/readme.txt /srv/projects/ && ls /srv/projects",
+    "out": "readme.txt\n",
     "err": "",
     "code": 0
    },
@@ -344,15 +316,8 @@ window.LAB_REFERENCE = [
    },
    {
     "host": "server",
-    "cmd": "cp -r /share/docs /srv/projects/",
-    "out": "",
-    "err": "",
-    "code": 0
-   },
-   {
-    "host": "server",
-    "cmd": "ls /srv/projects",
-    "out": "docs  readme.txt\n",
+    "cmd": "cp -r /share/docs /srv/projects/ && ls /srv/projects/docs",
+    "out": "manual.txt\n",
     "err": "",
     "code": 0
    }
@@ -367,14 +332,7 @@ window.LAB_REFERENCE = [
   "examples": [
    {
     "host": "server",
-    "cmd": "mv /srv/projects/notes.txt /srv/projects/notes-old.txt",
-    "out": "",
-    "err": "",
-    "code": 0
-   },
-   {
-    "host": "server",
-    "cmd": "ls /srv/projects",
+    "cmd": "mv /srv/projects/notes.txt /srv/projects/notes-old.txt && ls /srv/projects",
     "out": "notes-old.txt\n",
     "err": "",
     "code": 0
@@ -399,8 +357,8 @@ window.LAB_REFERENCE = [
   "examples": [
    {
     "host": "server",
-    "cmd": "rm /srv/projects/notes-old.txt",
-    "out": "",
+    "cmd": "rm /srv/projects/notes-old.txt && ls /srv/projects",
+    "out": "team\n",
     "err": "",
     "code": 0
    },
@@ -413,16 +371,9 @@ window.LAB_REFERENCE = [
    },
    {
     "host": "server",
-    "cmd": "rm -rf /srv/projects/team",
-    "out": "",
-    "err": "",
-    "code": 0
-   },
-   {
-    "host": "server",
-    "cmd": "ls /srv/projects",
-    "out": "",
-    "err": "",
+    "cmd": "rm -rf /srv/projects/team && echo removed && ls -d /srv/projects/team || echo gone",
+    "out": "removed\ngone\n",
+    "err": "ls: cannot access /srv/projects/team: No such file or directory\n",
     "code": 0
    }
   ]
@@ -441,14 +392,7 @@ window.LAB_REFERENCE = [
   "examples": [
    {
     "host": "server",
-    "cmd": "chmod 750 /srv/projects/run.sh",
-    "out": "",
-    "err": "",
-    "code": 0
-   },
-   {
-    "host": "server",
-    "cmd": "ls -l /srv/projects/run.sh",
+    "cmd": "chmod 750 /srv/projects/run.sh && ls -l /srv/projects/run.sh",
     "out": "-rwxr-x--- root root /srv/projects/run.sh\n",
     "err": "",
     "code": 0
@@ -469,14 +413,7 @@ window.LAB_REFERENCE = [
   "examples": [
    {
     "host": "server",
-    "cmd": "chown demo:users /srv/projects/run.sh",
-    "out": "",
-    "err": "",
-    "code": 0
-   },
-   {
-    "host": "server",
-    "cmd": "ls -l /srv/projects/run.sh",
+    "cmd": "chown demo:users /srv/projects/run.sh && ls -l /srv/projects/run.sh",
     "out": "-rw-r--r-- demo users /srv/projects/run.sh\n",
     "err": "",
     "code": 0
@@ -497,14 +434,7 @@ window.LAB_REFERENCE = [
   "examples": [
    {
     "host": "server",
-    "cmd": "chgrp teamx /srv/projects/run.sh",
-    "out": "",
-    "err": "",
-    "code": 0
-   },
-   {
-    "host": "server",
-    "cmd": "ls -l /srv/projects/run.sh",
+    "cmd": "chgrp teamx /srv/projects/run.sh && ls -l /srv/projects/run.sh",
     "out": "-rw-r--r-- root teamx /srv/projects/run.sh\n",
     "err": "",
     "code": 0
@@ -605,8 +535,8 @@ window.LAB_REFERENCE = [
    },
    {
     "host": "server",
-    "cmd": "hostnamectl set-hostname server2.lab",
-    "out": "",
+    "cmd": "hostnamectl set-hostname server2.lab && hostname",
+    "out": "server2\n",
     "err": "",
     "code": 0
    },
@@ -625,15 +555,31 @@ window.LAB_REFERENCE = [
   "syntax": "date",
   "summary": "Print the current date and time.",
   "flags": [],
-  "examples": []
+  "examples": [
+   {
+    "host": "server",
+    "cmd": "date",
+    "out": "Wed Nov 11 2026 00:06:28 GMT+0530 (India Standard Time)\n",
+    "err": "",
+    "code": 0
+   }
+  ]
  },
  {
   "name": "clear",
   "category": "Shell",
   "syntax": "clear",
-  "summary": "Clear the screen (in the browser terminal, Ctrl+L does the same).",
+  "summary": "Clear the screen (in the browser terminal, Ctrl+L does the same). Prints nothing itself.",
   "flags": [],
-  "examples": []
+  "examples": [
+   {
+    "host": "server",
+    "cmd": "echo before && clear && echo after",
+    "out": "before\nafter\n",
+    "err": "",
+    "code": 0
+   }
+  ]
  },
  {
   "name": "sync",
@@ -644,8 +590,8 @@ window.LAB_REFERENCE = [
   "examples": [
    {
     "host": "server",
-    "cmd": "sync",
-    "out": "",
+    "cmd": "sync && echo synced",
+    "out": "synced\n",
     "err": "",
     "code": 0
    }
@@ -687,9 +633,17 @@ window.LAB_REFERENCE = [
   "name": "exit",
   "category": "Shell",
   "syntax": "exit",
-  "summary": "Leave the shell (the simulator accepts it and does nothing).",
+  "summary": "Leave the shell (the simulator accepts it and keeps running).",
   "flags": [],
-  "examples": []
+  "examples": [
+   {
+    "host": "server",
+    "cmd": "echo still here && exit",
+    "out": "still here\n",
+    "err": "",
+    "code": 0
+   }
+  ]
  },
  {
   "name": "help",
@@ -725,21 +679,7 @@ window.LAB_REFERENCE = [
   "examples": [
    {
     "host": "server",
-    "cmd": "echo 'PASS_MAX_DAYS 99999' > /root/login-test.conf",
-    "out": "",
-    "err": "",
-    "code": 0
-   },
-   {
-    "host": "server",
-    "cmd": "sed -i 's/99999/60/' /root/login-test.conf",
-    "out": "",
-    "err": "",
-    "code": 0
-   },
-   {
-    "host": "server",
-    "cmd": "cat /root/login-test.conf",
+    "cmd": "echo 'PASS_MAX_DAYS 99999' > /root/login-test.conf && sed -i 's/99999/60/' /root/login-test.conf && cat /root/login-test.conf",
     "out": "PASS_MAX_DAYS 60\n",
     "err": "",
     "code": 0
@@ -784,22 +724,15 @@ window.LAB_REFERENCE = [
   "examples": [
    {
     "host": "server",
-    "cmd": "useradd -u 2001 harry",
-    "out": "",
-    "err": "",
-    "code": 0
-   },
-   {
-    "host": "server",
-    "cmd": "id harry",
+    "cmd": "useradd -u 2001 harry && id harry",
     "out": "uid=2001(harry) gid=2001(harry) groups=2001(harry)\n",
     "err": "",
     "code": 0
    },
    {
     "host": "server",
-    "cmd": "useradd -s /sbin/nologin sarah",
-    "out": "",
+    "cmd": "useradd -s /sbin/nologin sarah && getent passwd sarah",
+    "out": "sarah:x:1000:1000::/home/sarah:/sbin/nologin\n",
     "err": "",
     "code": 0
    },
@@ -838,36 +771,22 @@ window.LAB_REFERENCE = [
   "examples": [
    {
     "host": "server",
-    "cmd": "groupadd sysadmins",
-    "out": "",
-    "err": "",
-    "code": 0
-   },
-   {
-    "host": "server",
-    "cmd": "usermod -aG sysadmins harry",
-    "out": "",
-    "err": "",
-    "code": 0
-   },
-   {
-    "host": "server",
-    "cmd": "groups harry",
+    "cmd": "groupadd sysadmins && usermod -aG sysadmins harry && groups harry",
     "out": "harry : harry sysadmins\n",
     "err": "",
     "code": 0
    },
    {
     "host": "server",
-    "cmd": "usermod -L harry",
-    "out": "",
+    "cmd": "usermod -L harry && passwd -S harry",
+    "out": "harry LK 1970-01-01 0 99999 7 -1 (Password locked.)\n",
     "err": "",
     "code": 0
    },
    {
     "host": "server",
-    "cmd": "usermod -U harry",
-    "out": "",
+    "cmd": "usermod -U harry && passwd -S harry",
+    "out": "harry NP 1970-01-01 0 99999 7 -1 (No password set.)\n",
     "err": "",
     "code": 0
    }
@@ -887,14 +806,7 @@ window.LAB_REFERENCE = [
   "examples": [
    {
     "host": "server",
-    "cmd": "userdel -r tempuser",
-    "out": "",
-    "err": "",
-    "code": 0
-   },
-   {
-    "host": "server",
-    "cmd": "id tempuser",
+    "cmd": "userdel -r tempuser && id tempuser",
     "out": "",
     "err": "id: 'tempuser': no such user\n",
     "code": 1
@@ -915,14 +827,7 @@ window.LAB_REFERENCE = [
   "examples": [
    {
     "host": "server",
-    "cmd": "groupadd -g 4000 devops",
-    "out": "",
-    "err": "",
-    "code": 0
-   },
-   {
-    "host": "server",
-    "cmd": "getent group devops",
+    "cmd": "groupadd -g 4000 devops && getent group devops",
     "out": "devops:x:4000:\n",
     "err": "",
     "code": 0
@@ -945,8 +850,8 @@ window.LAB_REFERENCE = [
   "examples": [
    {
     "host": "server",
-    "cmd": "groupdel temp-grp",
-    "out": "",
+    "cmd": "groupdel temp-grp && echo removed",
+    "out": "removed\n",
     "err": "",
     "code": 0
    },
@@ -977,22 +882,15 @@ window.LAB_REFERENCE = [
   "examples": [
    {
     "host": "server",
-    "cmd": "gpasswd -a harry devops",
-    "out": "Adding user harry to group devops\n",
+    "cmd": "gpasswd -a harry devops && getent group devops",
+    "out": "Adding user harry to group devops\ndevops:x:1001:harry\n",
     "err": "",
     "code": 0
    },
    {
     "host": "server",
-    "cmd": "getent group devops",
-    "out": "devops:x:1001:harry\n",
-    "err": "",
-    "code": 0
-   },
-   {
-    "host": "server",
-    "cmd": "gpasswd -d harry devops",
-    "out": "Removing user harry from group devops\n",
+    "cmd": "gpasswd -d harry devops && getent group devops",
+    "out": "Removing user harry from group devops\ndevops:x:1001:\n",
     "err": "",
     "code": 0
    }
@@ -1042,8 +940,8 @@ window.LAB_REFERENCE = [
    },
    {
     "host": "server",
-    "cmd": "passwd -e harry",
-    "out": "Expiring password for user harry.\npasswd: Success.\n",
+    "cmd": "passwd -e harry && passwd -S harry",
+    "out": "Expiring password for user harry.\npasswd: Success.\nharry PS 2026-11-10 0 99999 7 -1 (Password set, SHA512 crypt.)\n",
     "err": "",
     "code": 0
    }
@@ -1083,28 +981,21 @@ window.LAB_REFERENCE = [
   "examples": [
    {
     "host": "server",
-    "cmd": "chage -M 90 harry",
-    "out": "",
+    "cmd": "chage -M 90 harry && chage -l harry",
+    "out": "Last password change                                : never\nPassword expires                                    : never\nPassword inactive                                   : never\nAccount expires                                     : never\nMinimum number of days between password change      : 0\nMaximum number of days between password change      : 90\nNumber of days of warning before password expires   : 7\n",
     "err": "",
     "code": 0
    },
    {
     "host": "server",
-    "cmd": "chage -d 0 harry",
-    "out": "",
+    "cmd": "chage -d 0 harry && chage -l harry",
+    "out": "Last password change                                : password must be changed\nPassword expires                                    : password must be changed\nPassword inactive                                   : never\nAccount expires                                     : never\nMinimum number of days between password change      : 0\nMaximum number of days between password change      : 90\nNumber of days of warning before password expires   : 7\n",
     "err": "",
     "code": 0
    },
    {
     "host": "server",
-    "cmd": "chage -E 2026-12-31 harry",
-    "out": "",
-    "err": "",
-    "code": 0
-   },
-   {
-    "host": "server",
-    "cmd": "chage -l harry",
+    "cmd": "chage -E 2026-12-31 harry && chage -l harry",
     "out": "Last password change                                : password must be changed\nPassword expires                                    : password must be changed\nPassword inactive                                   : never\nAccount expires                                     : Dec 31, 2026\nMinimum number of days between password change      : 0\nMaximum number of days between password change      : 90\nNumber of days of warning before password expires   : 7\n",
     "err": "",
     "code": 0
@@ -1154,6 +1045,13 @@ window.LAB_REFERENCE = [
     "host": "server",
     "cmd": "su - harry -c 'id'",
     "out": "uid=2001(harry) gid=2001(harry) groups=2001(harry)\n",
+    "err": "",
+    "code": 0
+   },
+   {
+    "host": "server",
+    "cmd": "su - harry -c 'whoami'",
+    "out": "harry\n",
     "err": "",
     "code": 0
    }
@@ -1221,8 +1119,8 @@ window.LAB_REFERENCE = [
   "examples": [
    {
     "host": "server",
-    "cmd": "pvcreate /dev/loop0",
-    "out": "Physical volume \"/dev/loop0\" successfully created.\n",
+    "cmd": "pvcreate /dev/loop0 && pvs",
+    "out": "Physical volume \"/dev/loop0\" successfully created.\nPV          VG  Fmt   Attr  PSize  PFree\n/dev/loop0      lvm2  ---   1G     1G\n",
     "err": "",
     "code": 0
    },
@@ -1230,13 +1128,6 @@ window.LAB_REFERENCE = [
     "host": "server",
     "cmd": "pvcreate /dev/loop0",
     "out": "Physical volume \"/dev/loop0\" successfully created.\n",
-    "err": "",
-    "code": 0
-   },
-   {
-    "host": "server",
-    "cmd": "pvs",
-    "out": "PV          VG  Fmt   Attr  PSize  PFree\n/dev/loop0      lvm2  ---   1G     1G\n",
     "err": "",
     "code": 0
    }
@@ -1272,15 +1163,8 @@ window.LAB_REFERENCE = [
   "examples": [
    {
     "host": "server",
-    "cmd": "vgcreate -s 16M datavg /dev/loop0",
-    "out": "Volume group \"datavg\" successfully created\n",
-    "err": "",
-    "code": 0
-   },
-   {
-    "host": "server",
-    "cmd": "vgs",
-    "out": "VG      #PV  #LV  Attr    VSize  VFree\ndatavg  1    0    wz--n-  1G     1G\n",
+    "cmd": "vgcreate -s 16M datavg /dev/loop0 && vgs",
+    "out": "Volume group \"datavg\" successfully created\nVG      #PV  #LV  Attr    VSize  VFree\ndatavg  1    0    wz--n-  1G     1G\n",
     "err": "",
     "code": 0
    }
@@ -1311,22 +1195,8 @@ window.LAB_REFERENCE = [
   "examples": [
    {
     "host": "server",
-    "cmd": "pvcreate /dev/loop1",
-    "out": "Physical volume \"/dev/loop1\" successfully created.\n",
-    "err": "",
-    "code": 0
-   },
-   {
-    "host": "server",
-    "cmd": "vgextend datavg /dev/loop1",
-    "out": "Volume group \"datavg\" successfully extended\n",
-    "err": "",
-    "code": 0
-   },
-   {
-    "host": "server",
-    "cmd": "vgs",
-    "out": "VG      #PV  #LV  Attr    VSize  VFree\ndatavg  2    0    wz--n-  2G     2G\n",
+    "cmd": "pvcreate /dev/loop1 && vgextend datavg /dev/loop1 && vgs",
+    "out": "Physical volume \"/dev/loop1\" successfully created.\nVolume group \"datavg\" successfully extended\nVG      #PV  #LV  Attr    VSize  VFree\ndatavg  2    0    wz--n-  2G     2G\n",
     "err": "",
     "code": 0
    }
@@ -1354,22 +1224,15 @@ window.LAB_REFERENCE = [
   "examples": [
    {
     "host": "server",
-    "cmd": "lvcreate -l 30 -n datalv datavg",
-    "out": "Logical volume \"datalv\" created.\n",
+    "cmd": "lvcreate -l 30 -n datalv datavg && lvs",
+    "out": "Logical volume \"datalv\" created.\nLV      VG      Attr        LSize  Path\ndatalv  datavg  -wi-a-----  480M   /dev/datavg/datalv\n",
     "err": "",
     "code": 0
    },
    {
     "host": "server",
-    "cmd": "lvcreate -L 512M -n swaplv datavg",
-    "out": "Logical volume \"swaplv\" created.\n",
-    "err": "",
-    "code": 0
-   },
-   {
-    "host": "server",
-    "cmd": "lvs",
-    "out": "LV      VG      Attr        LSize  Path\ndatalv  datavg  -wi-a-----  480M   /dev/datavg/datalv\nswaplv  datavg  -wi-a-----  512M   /dev/datavg/swaplv\n",
+    "cmd": "lvcreate -L 512M -n swaplv datavg && lvs",
+    "out": "Logical volume \"swaplv\" created.\nLV      VG      Attr        LSize  Path\ndatalv  datavg  -wi-a-----  480M   /dev/datavg/datalv\nswaplv  datavg  -wi-a-----  512M   /dev/datavg/swaplv\n",
     "err": "",
     "code": 0
    }
@@ -1409,15 +1272,8 @@ window.LAB_REFERENCE = [
   "examples": [
    {
     "host": "server",
-    "cmd": "lvextend -L 800M datavg/datalv",
-    "out": "Size of logical volume datavg/datalv changed from 480M (30 extents) to 800M (50 extents).\nLogical volume datavg/datalv successfully resized.\n",
-    "err": "",
-    "code": 0
-   },
-   {
-    "host": "server",
-    "cmd": "lvs",
-    "out": "LV      VG      Attr        LSize  Path\ndatalv  datavg  -wi-a-----  800M   /dev/datavg/datalv\n",
+    "cmd": "lvextend -L 800M datavg/datalv && lvs",
+    "out": "Size of logical volume datavg/datalv changed from 480M (30 extents) to 800M (50 extents).\nLogical volume datavg/datalv successfully resized.\nLV      VG      Attr        LSize  Path\ndatalv  datavg  -wi-a-----  800M   /dev/datavg/datalv\n",
     "err": "",
     "code": 0
    }
@@ -1448,22 +1304,8 @@ window.LAB_REFERENCE = [
    },
    {
     "host": "server",
-    "cmd": "umount /mnt",
-    "out": "",
-    "err": "",
-    "code": 0
-   },
-   {
-    "host": "server",
-    "cmd": "lvreduce -r -L 256M datavg/swaplv",
-    "out": "Size of logical volume datavg/swaplv changed from 512M (32 extents) to 256M (16 extents).\nLogical volume datavg/swaplv successfully resized.\n",
-    "err": "",
-    "code": 0
-   },
-   {
-    "host": "server",
-    "cmd": "lvs",
-    "out": "LV      VG      Attr        LSize  Path\nswaplv  datavg  -wi-a-----  256M   /dev/datavg/swaplv\n",
+    "cmd": "umount /mnt && lvreduce -r -L 256M datavg/swaplv && lvs",
+    "out": "Size of logical volume datavg/swaplv changed from 512M (32 extents) to 256M (16 extents).\nLogical volume datavg/swaplv successfully resized.\nLV      VG      Attr        LSize  Path\nswaplv  datavg  -wi-a-----  256M   /dev/datavg/swaplv\n",
     "err": "",
     "code": 0
    }
@@ -1483,8 +1325,8 @@ window.LAB_REFERENCE = [
   "examples": [
    {
     "host": "server",
-    "cmd": "mkfs.xfs /dev/datavg/datalv",
-    "out": "xfs filesystem created on /dev/datavg/datalv (UUID=a5c7c6ad-c42d-f76d-5511-a8f3abc89513)\n",
+    "cmd": "mkfs.xfs /dev/datavg/datalv && blkid",
+    "out": "xfs filesystem created on /dev/datavg/datalv (UUID=1d9caac6-f5d3-5394-7df6-c2d3c075e2ae)\n/dev/datavg/datalv: UUID=\"1d9caac6-f5d3-5394-7df6-c2d3c075e2ae\" TYPE=\"xfs\"\n",
     "err": "",
     "code": 0
    },
@@ -1515,8 +1357,8 @@ window.LAB_REFERENCE = [
   "examples": [
    {
     "host": "server",
-    "cmd": "mkfs.ext4 /dev/datavg/backuplv",
-    "out": "ext4 filesystem created on /dev/datavg/backuplv (UUID=8d91578b-05a0-5ef6-0499-63b9717a6509)\n",
+    "cmd": "mkfs.ext4 /dev/datavg/backuplv && blkid",
+    "out": "ext4 filesystem created on /dev/datavg/backuplv (UUID=aef9063b-490e-035b-9686-64f483a17212)\n/dev/datavg/backuplv: UUID=\"aef9063b-490e-035b-9686-64f483a17212\" TYPE=\"ext4\"\n",
     "err": "",
     "code": 0
    }
@@ -1531,8 +1373,8 @@ window.LAB_REFERENCE = [
   "examples": [
    {
     "host": "server",
-    "cmd": "mkswap /dev/datavg/swaplv",
-    "out": "Setting up swapspace version 1, size = 524288 KiB\nno label, UUID=dc9a4c50-0752-1a8f-43ab-af940959b78a\n",
+    "cmd": "mkswap /dev/datavg/swaplv && blkid",
+    "out": "Setting up swapspace version 1, size = 524288 KiB\nno label, UUID=4d243c97-9ad4-3d4d-8545-a488a001890e\n/dev/datavg/swaplv: UUID=\"4d243c97-9ad4-3d4d-8545-a488a001890e\" TYPE=\"swap\"\n",
     "err": "",
     "code": 0
    }
@@ -1541,8 +1383,8 @@ window.LAB_REFERENCE = [
  {
   "name": "swapon",
   "category": "Storage",
-  "syntax": "swapon DEVICE  |  swapon -a",
-  "summary": "Enable swap. -a enables every swap entry in /etc/fstab.",
+  "syntax": "swapon DEVICE  |  swapon -a  |  swapon (list)",
+  "summary": "Enable swap. -a enables every swap entry in /etc/fstab. With no arguments it lists active swap.",
   "flags": [
    [
     "-a",
@@ -1552,15 +1394,15 @@ window.LAB_REFERENCE = [
   "examples": [
    {
     "host": "server",
-    "cmd": "swapon /dev/datavg/swaplv",
-    "out": "",
+    "cmd": "swapon /dev/datavg/swaplv && swapon",
+    "out": "NAME                 TYPE       SIZE USED PRIO\n/dev/datavg/swaplv   partition   512M 0B   -2\n",
     "err": "",
     "code": 0
    },
    {
     "host": "server",
-    "cmd": "swapon -a",
-    "out": "",
+    "cmd": "swapon -a && swapon",
+    "out": "NAME                 TYPE       SIZE USED PRIO\n/dev/datavg/swaplv   partition   512M 0B   -2\n",
     "err": "",
     "code": 0
    }
@@ -1575,8 +1417,8 @@ window.LAB_REFERENCE = [
   "examples": [
    {
     "host": "server",
-    "cmd": "swapoff /dev/datavg/swaplv",
-    "out": "",
+    "cmd": "swapoff /dev/datavg/swaplv && swapon",
+    "out": "NAME                 TYPE       SIZE USED PRIO\n",
     "err": "",
     "code": 0
    }
@@ -1604,15 +1446,8 @@ window.LAB_REFERENCE = [
   "examples": [
    {
     "host": "server",
-    "cmd": "mount",
-    "out": "",
-    "err": "",
-    "code": 0
-   },
-   {
-    "host": "server",
-    "cmd": "mount /dev/datavg/datalv /data",
-    "out": "",
+    "cmd": "mount /dev/datavg/datalv /data && mount",
+    "out": "/dev/datavg/datalv on /data type xfs (defaults)\n",
     "err": "",
     "code": 0
    },
@@ -1622,13 +1457,6 @@ window.LAB_REFERENCE = [
     "out": "",
     "err": "mount: /data is already mounted\n",
     "code": 1
-   },
-   {
-    "host": "server",
-    "cmd": "mount",
-    "out": "/dev/datavg/datalv on /data type xfs (defaults)\n",
-    "err": "",
-    "code": 0
    }
   ]
  },
@@ -1641,8 +1469,8 @@ window.LAB_REFERENCE = [
   "examples": [
    {
     "host": "server",
-    "cmd": "umount /data",
-    "out": "",
+    "cmd": "umount /data && echo unmounted && mount || echo nothing mounted",
+    "out": "unmounted\n",
     "err": "",
     "code": 0
    },
@@ -1702,7 +1530,7 @@ window.LAB_REFERENCE = [
    {
     "host": "server",
     "cmd": "blkid",
-    "out": "/dev/datavg/datalv: UUID=\"ee67e584-6fae-8b2b-fc86-b734e4e3e27f\" TYPE=\"xfs\"\n",
+    "out": "/dev/datavg/datalv: UUID=\"213ec8d0-979c-fc96-6de3-71c022a45ad9\" TYPE=\"xfs\"\n",
     "err": "",
     "code": 0
    }
@@ -1730,14 +1558,7 @@ window.LAB_REFERENCE = [
   "examples": [
    {
     "host": "server",
-    "cmd": "systemctl enable --now nfs-server",
-    "out": "",
-    "err": "",
-    "code": 0
-   },
-   {
-    "host": "server",
-    "cmd": "systemctl is-active nfs-server",
+    "cmd": "systemctl enable --now nfs-server && systemctl is-active nfs-server",
     "out": "active\n",
     "err": "",
     "code": 0
@@ -1780,21 +1601,7 @@ window.LAB_REFERENCE = [
   "examples": [
    {
     "host": "server",
-    "cmd": "echo \"/share 192.168.50.0/24(rw,sync,no_root_squash)\" >> /etc/exports",
-    "out": "",
-    "err": "",
-    "code": 0
-   },
-   {
-    "host": "server",
-    "cmd": "exportfs -ra",
-    "out": "",
-    "err": "",
-    "code": 0
-   },
-   {
-    "host": "server",
-    "cmd": "exportfs -v",
+    "cmd": "echo \"/share 192.168.50.0/24(rw,sync,no_root_squash)\" >> /etc/exports && exportfs -ra && exportfs -v",
     "out": "/share\t192.168.50.0/24(rw,sync,no_root_squash)\n",
     "err": "",
     "code": 0
