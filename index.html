@@ -2,13 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+  <meta name="theme-color" content="#ffffff">
   <title>RHLab - RHCSA practice</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="app">
   <header class="topbar">
     <div class="brand">
       <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><rect width="28" height="28" fill="#0b0d10"/><path d="M7 8.5l5.5 5.5L7 19.5" fill="none" stroke="#fff" stroke-width="2.4"/><rect x="14.5" y="18" width="7" height="2.6" fill="#5c85ff"/></svg>
@@ -28,7 +29,12 @@
     </div>
   </header>
 
-  <main>
+  <nav class="mswitch" aria-label="View">
+    <button class="mtab active" data-view="tasks" aria-pressed="true">Tasks <span id="mcount" class="mcount"></span></button>
+    <button class="mtab" data-view="term" aria-pressed="false">Terminal</button>
+  </nav>
+
+  <main data-view="tasks">
     <section id="tasks" class="panel tasks" aria-label="Tasks"></section>
 
     <section class="panel term-panel" aria-label="Terminals">
@@ -45,6 +51,20 @@
           <div class="boot-head"><span>Simulated reboot</span><span class="muted">server + client</span></div>
           <div class="boot-lines"></div>
         </div>
+      </div>
+      <div id="keybar" class="keybar" aria-label="Terminal keys">
+        <button type="button" data-key="up" aria-label="Previous command">&uarr;</button>
+        <button type="button" data-key="down" aria-label="Next command">&darr;</button>
+        <button type="button" data-ins="|">|</button>
+        <button type="button" data-ins="/">/</button>
+        <button type="button" data-ins="-">-</button>
+        <button type="button" data-ins="&gt;">&gt;</button>
+        <button type="button" data-ins="~">~</button>
+        <button type="button" data-ins="&amp;&amp; ">&amp;&amp;</button>
+        <button type="button" data-ins="'">'</button>
+        <button type="button" data-ins='"'>"</button>
+        <button type="button" data-key="clear">clear</button>
+        <button type="button" data-key="enter" class="run">Run &#9166;</button>
       </div>
       <div id="status" class="status"></div>
     </section>

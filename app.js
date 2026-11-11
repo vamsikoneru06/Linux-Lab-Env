@@ -3,6 +3,9 @@
   'use strict';
 
   const $ = (sel) => document.querySelector(sel);
+  const mqMobile = window.matchMedia('(max-width: 900px)');
+  const mqTouch = window.matchMedia('(pointer: coarse)');
+  const isMobile = () => mqMobile.matches;
   const PROGRESS_KEY = 'rhlab.progress.v1';
   const MOCK_MINUTES = 60;
   const MOCK_TASKS = 8;
@@ -50,7 +53,10 @@
     const root = $('#term-' + hostName);
     const out = el('pre', { class: 'out' });
     const prompt = el('span', { class: 'prompt' });
-    const input = el('input', { class: 'in', autocomplete: 'off', spellcheck: 'false', 'aria-label': hostName + ' command' });
+    const input = el('input', {
+      class: 'in', type: 'text', autocomplete: 'off', autocorrect: 'off', autocapitalize: 'off',
+      spellcheck: 'false', enterkeyhint: 'send', 'aria-label': hostName + ' command',
+    });
     root.append(out, el('div', { class: 'line' }, [prompt, input]));
     const term = {
       host: hostName,
@@ -68,7 +74,8 @@
       else if (e.key === 'ArrowDown') { e.preventDefault(); histStep(term, 1); }
       else if (e.key === 'l' && e.ctrlKey) { e.preventDefault(); out.textContent = ''; }
     });
-    root.addEventListener('click', () => input.focus());
+    // Tap anywhere in the terminal to type, but not while selecting text to copy.
+    root.addEventListener('click', () => { if (!String(window.getSelection() || '')) input.focus(); });
     terms[hostName] = term;
     renderPrompt(term);
     return term;
@@ -168,6 +175,7 @@
       grid.append(el('span', { class: cls }));
     }
     const count = el('span', { class: 'count', text: passedTasks + ' of ' + LAB_TASKS.length + ' passed' });
+    $('#mcount').textContent = passedTasks + '/' + LAB_TASKS.length;
     const top = el('div', { class: 'row-top' }, [el('span', { class: 'title', text: 'Tasks' }), count]);
     return el('div', { class: 'list-head' }, [top, grid]);
   }
@@ -220,7 +228,11 @@
         class: 'btn', text: 'Check',
         onclick: () => { runChecks(task); saveProgress(); renderTasks(); },
       });
-      body.append(el('div', { class: 'actions' }, [checkBtn]), resultsBlock(task));
+      const termBtn = el('button', {
+        class: 'btn m-only', text: 'Open ' + task.host + ' terminal',
+        onclick: () => { setView('term'); selectHost(task.host); },
+      });
+      body.append(el('div', { class: 'actions' }, [checkBtn, termBtn]), resultsBlock(task));
       const card = el('div', { class: cls, id: 'task-' + task.id }, [
         el('div', { class: 'num', text: String(task.num).padStart(2, '0') }),
         body,
@@ -319,6 +331,7 @@
     allTerms(t => append(t, 'Mock exam started. Good luck.\n\n'));
     startTimer();
     renderTasks();
+    $('#tasks').scrollTop = 0;
   }
 
   function startTimer() {
@@ -365,10 +378,82 @@
   }
 
   // ---------------------------------------------------------------- wiring
+  let activeHost = 'server';
+
   function selectHost(name) {
+    activeHost = name;
     document.querySelectorAll('.tab[data-host]').forEach(b => b.classList.toggle('active', b.dataset.host === name));
     ['server', 'client'].forEach(h => $('#term-' + h).classList.toggle('hidden', h !== name));
-    terms[name].input.focus();
+    const t = terms[name];
+    t.out.scrollTop = t.out.scrollHeight;
+    // On touch screens focusing pops the keyboard over the output; let the user tap to type instead.
+    if (!mqTouch.matches) t.input.focus();
+  }
+
+  // Phones show one panel at a time: the task list or the terminals.
+  function setView(view) {
+    $('main').dataset.view = view;
+    document.querySelectorAll('.mtab').forEach(b => {
+      const on = b.dataset.view === view;
+      b.classList.toggle('active', on);
+      b.setAttribute('aria-pressed', String(on));
+    });
+    if (view === 'term') { const t = terms[activeHost]; t.out.scrollTop = t.out.scrollHeight; }
+  }
+
+  // Extra keys for phone keyboards: history, symbols that are buried on mobile layouts, run.
+  function wireKeybar() {
+    const bar = $('#keybar');
+    // Keep focus (and the on-screen keyboard) on the terminal input while tapping keys.
+    bar.addEventListener('mousedown', (e) => e.preventDefault());
+    bar.addEventListener('click', (e) => {
+      const b = e.target.closest('button');
+      if (!b) return;
+      const t = terms[activeHost];
+      const input = t.input;
+      if (b.dataset.ins !== undefined) {
+        const ins = b.dataset.ins;
+        const start = input.selectionStart == null ? input.value.length : input.selectionStart;
+        const end = input.selectionEnd == null ? start : input.selectionEnd;
+        input.value = input.value.slice(0, start) + ins + input.value.slice(end);
+        input.focus();
+        input.setSelectionRange(start + ins.length, start + ins.length);
+        return;
+      }
+      const key = b.dataset.key;
+      if (key === 'up') histStep(t, -1);
+      else if (key === 'down') histStep(t, 1);
+      else if (key === 'clear') t.out.textContent = '';
+      else if (key === 'enter') { runLine(t, input.value); input.value = ''; }
+      if (key === 'up' || key === 'down') {
+        input.focus();
+        const n = input.value.length;
+        input.setSelectionRange(n, n);
+      }
+    });
+  }
+
+  // Size the app to the visible area so the prompt stays above the on-screen keyboard (iOS does
+  // not shrink the layout viewport when the keyboard opens).
+  function wireViewport() {
+    const vv = window.visualViewport;
+    let baseW = 0;
+    let baseH = 0; // tallest height seen at this width = height with the keyboard closed
+    const apply = () => {
+      const h = vv ? vv.height : window.innerHeight;
+      if (window.innerWidth !== baseW) { baseW = window.innerWidth; baseH = 0; }
+      baseH = Math.max(baseH, h, window.innerHeight);
+      document.documentElement.style.setProperty('--app-h', h + 'px');
+      const typing = document.activeElement && document.activeElement.tagName === 'INPUT';
+      const kb = isMobile() && typing && baseH - h > 120;
+      document.body.classList.toggle('kb-open', !!kb);
+      if (isMobile() && vv && vv.offsetTop) window.scrollTo(0, 0);
+      if (kb) { const t = terms[activeHost]; t.out.scrollTop = t.out.scrollHeight; }
+    };
+    if (vv) { vv.addEventListener('resize', apply); vv.addEventListener('scroll', apply); }
+    window.addEventListener('resize', apply);
+    document.addEventListener('focusout', () => setTimeout(apply, 50));
+    apply();
   }
 
   function init() {
@@ -379,8 +464,11 @@
     allTerms(t => append(t, 'RHLab shell. Type "help" for the command list.\nYou are root on ' + Sim.lab.host(t.host).hostname + '.\n\n'));
 
     document.querySelectorAll('.tab[data-host]').forEach(b => b.addEventListener('click', () => selectHost(b.dataset.host)));
+    document.querySelectorAll('.mtab').forEach(b => b.addEventListener('click', () => setView(b.dataset.view)));
+    wireKeybar();
+    wireViewport();
     $('#btn-check-all').addEventListener('click', () => checkAll('Check all'));
-    $('#btn-reboot').addEventListener('click', reboot);
+    $('#btn-reboot').addEventListener('click', () => { if (isMobile()) setView('term'); reboot(); });
     $('#btn-reset').addEventListener('click', resetLab);
     $('#btn-mock').addEventListener('click', startMock);
     $('#btn-end').addEventListener('click', () => { if (confirm('End the exam now and grade it?')) finishMock('ended early'); });
@@ -391,7 +479,9 @@
     }
     renderTasks();
     selectHost('server');
-    status('Ready. Use the terminals on the right; click Check on a task when you think it is done.');
+    status(isMobile()
+      ? 'Ready. Switch to Terminal to type commands; tap Check on a task when it is done.'
+      : 'Ready. Use the terminals on the right; click Check on a task when you think it is done.');
   }
 
   init();

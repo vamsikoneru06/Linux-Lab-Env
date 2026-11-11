@@ -200,10 +200,101 @@ pre.sol {
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; animation: none !important; }
 }
+/* mobile-only pieces, hidden on desktop */
+.mswitch, .keybar, .m-only { display: none; }
+
+/* on-screen-keyboard helpers for any touch screen (phones and tablets) */
+@media (pointer: coarse) {
+  .keybar { display: flex; }
+  .term .in { font-size: 16px; } /* 16px stops iOS from zooming into the input */
+}
+.keybar {
+  flex: none; gap: 6px; padding: 6px 12px; overflow-x: auto; scrollbar-width: none;
+  border-top: 1px solid var(--line-soft); background: var(--paper);
+}
+.keybar::-webkit-scrollbar { display: none; }
+.keybar button {
+  flex: none; min-width: 40px; height: 36px; padding: 0 10px; border: 1px solid var(--line);
+  background: var(--code-bg); color: var(--ink); font: 600 14px var(--mono); border-radius: 0;
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+}
+.keybar button:active { background: var(--line-soft); }
+.keybar .run { margin-left: auto; position: sticky; right: 0; box-shadow: -8px 0 0 var(--paper); background: var(--ink); border-color: var(--ink); color: #fff; padding: 0 14px; }
+.keybar .run:active { background: #242a33; }
+
 @media (max-width: 900px) {
-  main { grid-template-columns: 1fr; height: auto; }
-  .topbar { height: auto; flex-wrap: wrap; padding: 12px 16px; gap: 10px; }
-  .tasks { border-right: 0; border-bottom: 1px solid var(--ink); }
-  .term-panel { min-height: 420px; }
-  .toolbar { flex-wrap: wrap; }
+  /* app shell: one screen, one panel at a time, sized to the visible viewport */
+  body.app {
+    height: var(--app-h, 100dvh); overflow: hidden;
+    display: flex; flex-direction: column;
+  }
+  body.app main { display: block; flex: 1; min-height: 0; height: auto; }
+  body.app main > .panel { height: 100%; }
+  body.app main[data-view="tasks"] .term-panel,
+  body.app main[data-view="term"] .tasks { display: none; }
+  body.app.kb-open .topbar,
+  body.app.kb-open .mswitch,
+  body.app.kb-open .status { display: none; }
+
+  /* top bar: brand on one line, actions in a swipeable row */
+  .topbar {
+    height: auto; flex: none; flex-wrap: wrap; gap: 8px 12px;
+    padding: max(10px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) 10px max(16px, env(safe-area-inset-left));
+  }
+  .brand .divider, .sub { display: none; }
+  .toolbar {
+    flex: 1 1 100%; overflow-x: auto; scrollbar-width: none; gap: 6px;
+    margin: 0 -16px; padding: 0 16px; width: calc(100% + 32px);
+  }
+  .toolbar::-webkit-scrollbar { display: none; }
+  .toolbar .divider { display: none; }
+  .toolbar .btn { flex: none; min-height: 38px; padding: 8px 12px; display: inline-flex; align-items: center; }
+  .timer { order: -1; margin-right: 4px; padding: 6px 10px; font-size: 15px; flex: none; }
+  .timer::before { content: "LEFT"; }
+
+  /* Tasks / Terminal switch */
+  .mswitch {
+    display: grid; grid-template-columns: 1fr 1fr; flex: none; height: 44px;
+    background: var(--paper); border-bottom: 1px solid var(--ink);
+  }
+  .mtab {
+    border: 0; background: none; color: var(--muted); font: 600 14px var(--sans);
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .mtab.active { color: var(--ink); box-shadow: inset 0 -3px 0 var(--ink); }
+  .mcount { font: 500 11px/16px var(--mono); padding: 0 6px; background: var(--chip); color: var(--ink-2); }
+  .mcount:empty { display: none; }
+  .m-only { display: inline-flex; }
+
+  /* task list */
+  .tasks {
+    border-right: 0; padding: 12px max(12px, env(safe-area-inset-right)) calc(16px + env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+    -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
+  }
+  .card { grid-template-columns: 28px minmax(0, 1fr); padding: 12px; }
+  .card .row { white-space: normal; row-gap: 6px; }
+  .card h3 { font-size: 15px; }
+  .scenario { font-size: 14px; }
+  summary { padding: 6px 0; -webkit-tap-highlight-color: transparent; }
+  pre.sol { font-size: 12px; }
+  .actions { gap: 8px; flex-wrap: wrap; }
+  .actions .btn { min-height: 40px; padding: 8px 16px; }
+  .actions .m-only { font-weight: 500; }
+  .mockbar { flex-direction: column; gap: 2px; }
+
+  /* terminals */
+  .term-panel { min-height: 0; }
+  .tabs { padding: 0 8px; height: 42px; }
+  .tab { padding: 0 12px; font-size: 13px; }
+  .disks { display: none; }
+  .term .out { padding: 12px; font-size: 12.5px; overscroll-behavior: contain; }
+  .term .line { padding: 8px 12px; }
+  .term .in { font-size: 16px; }
+  .keybar { display: flex; padding: 6px 8px; }
+  .boot { padding: 16px; font-size: 12px; }
+  .status {
+    height: auto; min-height: 28px; padding: 4px 12px calc(4px + env(safe-area-inset-bottom));
+    font-size: 11px; white-space: nowrap; overflow: hidden;
+  }
 }

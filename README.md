@@ -34,6 +34,10 @@ Then open <http://127.0.0.1:3000> in your browser. The server binds to 127.0.0.1
 - **Built-in examples**: every lab starts with three extra 2G disks per host (`/dev/loop3`-`loop5`, disk4-disk6) and some ready-made volumes to try commands on: volume group `sandvg` with an ext4 filesystem mounted on `/mnt/sandbox` (with a test file), a swap LV, user `demouser` (UID 4001, password `redhat`), and on the client a second volume group with an XFS LV. These use names and disks the exam tasks don't touch, so the 26 tasks still start clean. NFS is not preloaded.
 - **Mock exam**: resets the lab, picks 8 random tasks (with their prerequisites), starts a 60-minute timer and hides hints and solutions. At the end it simulates a reboot and grades every check.
 
+### On a phone or tablet
+
+The same lab works on mobile. On narrow screens the page shows one panel at a time: use the **Tasks / Terminal** switch under the top bar. Each task card has an **Open server/client terminal** button that jumps straight to the right shell. Below the prompt there is a key row with history (up/down), the symbols that are hard to reach on phone keyboards (`| / - > ~ && ' "`), clear and Run. The top bar's actions scroll sideways, and the top bar hides while the keyboard is open so the prompt stays visible.
+
 Progress and lab state are saved in this browser's localStorage. Other browsers and other machines start fresh.
 
 ## Command reference
